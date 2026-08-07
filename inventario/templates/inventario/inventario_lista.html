@@ -1,0 +1,120 @@
+{% extends 'inventario/base.html' %}
+
+{% block titulo_pagina %}Inventario - Mi Supermercado{% endblock %}
+
+{% block contenido %}
+<h1 class="titulo-seccion mb-4">Inventario de productos</h1>
+
+<!-- Filtros y acciones -->
+<div class="d-flex flex-wrap align-items-center gap-3 mb-4">
+    <div class="btn-group" role="group" aria-label="Filtrar productos">
+        <a href="?filtro=todos"
+           class="btn btn-outline-primary btn-grande {% if filtro == 'todos' %}active{% endif %}">
+            Todos
+        </a>
+        <a href="?filtro=activos"
+           class="btn btn-outline-primary btn-grande {% if filtro == 'activos' %}active{% endif %}">
+            Solo activos
+        </a>
+        <a href="?filtro=inactivos"
+           class="btn btn-outline-primary btn-grande {% if filtro == 'inactivos' %}active{% endif %}">
+            Solo inactivos
+        </a>
+    </div>
+    <a href="{% url 'inventario:crear_producto' %}" class="btn btn-success btn-grande ms-auto">
+        + Agregar producto
+    </a>
+    <a href="{% url 'inventario:crear_proveedor' %}" class="btn btn-outline-secondary btn-grande">
+        + Agregar proveedor
+    </a>
+</div>
+
+<!-- Tabla de productos -->
+<div class="table-responsive">
+    <table class="table table-hover table-lg align-middle">
+        <thead class="table-dark">
+            <tr>
+                <th>Nombre</th>
+                <th>Precio</th>
+                <th>Stock</th>
+                <th>Estado</th>
+                <th>Proveedor</th>
+                <th>Activo</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in productos_con_estado %}
+            <tr class="{% if not item.obj.activo %}fila-inactiva{% endif %}">
+                <td class="fw-semibold">{{ item.obj.nombre }}</td>
+                <td>{{ item.precio_formateado }}</td>
+                <td>{{ item.obj.cantidad_stock }}</td>
+                <td>
+                    <span class="badge badge-stock bg-{{ item.color }} {% if item.color == 'yellow' %}badge-yellow{% endif %}">
+                        {{ item.texto_stock }}
+                    </span>
+                </td>
+                <td>{{ item.obj.proveedor.nombre }}</td>
+                <td>
+                    {% if item.obj.activo %}
+                        <span class="text-success fw-bold">Sí</span>
+                    {% else %}
+                        <span class="text-muted">No</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <div class="d-flex flex-wrap gap-2">
+                        <a href="{% url 'inventario:editar_producto' item.obj.id %}"
+                           class="btn btn-outline-primary btn-accion">
+                            Editar
+                        </a>
+                        {% if item.obj.activo %}
+                        <a href="{% url 'inventario:desactivar_producto' item.obj.id %}"
+                           class="btn btn-outline-danger btn-accion">
+                            Desactivar
+                        </a>
+                        {% endif %}
+                    </div>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="7" class="text-center texto-ayuda py-5">
+                    No hay productos registrados.
+                    <a href="{% url 'inventario:crear_producto' %}">Agrega el primero</a>.
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Paginación -->
+{% if productos_pagina.has_other_pages %}
+<nav aria-label="Páginas del inventario" class="mt-4">
+    <ul class="pagination pagination-lg justify-content-center">
+        {% if productos_pagina.has_previous %}
+        <li class="page-item">
+            <a class="page-link" href="?filtro={{ filtro }}&pagina={{ productos_pagina.previous_page_number }}">
+                Anterior
+            </a>
+        </li>
+        {% endif %}
+
+        <li class="page-item active">
+            <span class="page-link">
+                Página {{ productos_pagina.number }} de {{ productos_pagina.paginator.num_pages }}
+            </span>
+        </li>
+
+        {% if productos_pagina.has_next %}
+        <li class="page-item">
+            <a class="page-link" href="?filtro={{ filtro }}&pagina={{ productos_pagina.next_page_number }}">
+                Siguiente
+            </a>
+        </li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+{% endblock %}

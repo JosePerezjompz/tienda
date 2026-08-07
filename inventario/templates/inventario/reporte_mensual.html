@@ -1,0 +1,286 @@
+{% extends 'inventario/base.html' %}
+
+
+
+{% block titulo_pagina %}Reporte {{ mes_nombre }} {{ anio }} - Mi Supermercado{% endblock %}
+
+
+
+{% block contenido %}
+
+<div class="row justify-content-center">
+
+    <div class="col-lg-10">
+
+        <h1 class="titulo-seccion mb-2">Reporte de {{ mes_nombre }} {{ anio }}</h1>
+
+        <p class="texto-ayuda mb-4">Generado bajo demanda. Los datos del historial no se modifican.</p>
+
+
+
+        <!-- Resumen general -->
+
+        <div class="indicadores-ventas mb-5">
+
+            <div class="tarjeta-resumen">
+
+                <p class="tarjeta-etiqueta">Total vendido en el mes</p>
+
+                <p class="tarjeta-valor">{{ total_mes_formateado }}</p>
+
+                <p class="tarjeta-subvalor">{{ cantidad_ventas }} venta{{ cantidad_ventas|pluralize:"s" }}</p>
+
+            </div>
+
+            <div class="tarjeta-resumen tarjeta-resumen-domicilio">
+
+                <p class="tarjeta-etiqueta">Ventas a domicilio</p>
+
+                <p class="tarjeta-valor">{{ total_domicilio_formateado }}</p>
+
+                <p class="tarjeta-subvalor">{{ cantidad_domicilio }} venta{{ cantidad_domicilio|pluralize:"s" }}</p>
+
+            </div>
+
+            <div class="tarjeta-resumen tarjeta-resumen-tienda">
+
+                <p class="tarjeta-etiqueta">Ventas en tienda</p>
+
+                <p class="tarjeta-valor">{{ total_tienda_formateado }}</p>
+
+                <p class="tarjeta-subvalor">{{ cantidad_tienda }} venta{{ cantidad_tienda|pluralize:"s" }}</p>
+
+            </div>
+
+            <div class="tarjeta-resumen tarjeta-resumen-fiado">
+
+                <p class="tarjeta-etiqueta">Cuentas por cobrar</p>
+
+                <p class="tarjeta-valor">{{ total_fiados_formateado }}</p>
+
+                <p class="tarjeta-subvalor">{{ cuentas_por_cobrar|length }} cliente{{ cuentas_por_cobrar|length|pluralize:"s" }}</p>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- Desglose domicilio vs tienda -->
+
+        {% if cantidad_ventas > 0 %}
+
+        <div class="panel-seccion mb-5">
+
+            <h2 class="subtitulo-seccion mb-3">Desglose por tipo de entrega</h2>
+
+            <div class="row g-4">
+
+                <div class="col-md-6">
+
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+
+                        <span class="badge-entrega badge-domicilio">Domicilio</span>
+
+                        <span class="fw-bold">{{ total_domicilio_formateado }}</span>
+
+                    </div>
+
+                    <div class="progress rounded-pill" style="height: 1.25rem;">
+
+                        {% widthratio total_domicilio total_mes 100 as pct_domicilio %}
+
+                        <div class="progress-bar bg-primary rounded-pill" role="progressbar"
+
+                             style="width: {{ pct_domicilio }}%"
+
+                             aria-valuenow="{{ pct_domicilio }}" aria-valuemin="0" aria-valuemax="100">
+
+                            {{ pct_domicilio }}%
+
+                        </div>
+
+                    </div>
+
+                    <p class="texto-ayuda mt-2 mb-0">{{ cantidad_domicilio }} venta{{ cantidad_domicilio|pluralize:"s" }}</p>
+
+                </div>
+
+                <div class="col-md-6">
+
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+
+                        <span class="badge-entrega badge-tienda">En tienda</span>
+
+                        <span class="fw-bold">{{ total_tienda_formateado }}</span>
+
+                    </div>
+
+                    <div class="progress rounded-pill" style="height: 1.25rem;">
+
+                        {% widthratio total_tienda total_mes 100 as pct_tienda %}
+
+                        <div class="progress-bar bg-success rounded-pill" role="progressbar"
+
+                             style="width: {{ pct_tienda }}%"
+
+                             aria-valuenow="{{ pct_tienda }}" aria-valuemin="0" aria-valuemax="100">
+
+                            {{ pct_tienda }}%
+
+                        </div>
+
+                    </div>
+
+                    <p class="texto-ayuda mt-2 mb-0">{{ cantidad_tienda }} venta{{ cantidad_tienda|pluralize:"s" }}</p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        {% endif %}
+
+
+
+        <!-- Cuentas por cobrar -->
+
+        {% if cuentas_por_cobrar %}
+
+        <div class="seccion-cxc mb-5">
+
+            <h2 class="subtitulo-seccion mb-3">Cuentas por cobrar (Fiados)</h2>
+
+            <p class="texto-ayuda mb-3">Montos adeudados agrupados por cliente en {{ mes_nombre }} {{ anio }}.</p>
+
+            <div class="table-responsive">
+
+                <table class="table table-lg align-middle mb-0">
+
+                    <thead class="table-light">
+
+                        <tr>
+
+                            <th>Cliente</th>
+
+                            <th class="text-end">Total adeudado</th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                        {% for cuenta in cuentas_por_cobrar %}
+
+                        <tr>
+
+                            <td class="fw-semibold">{{ cuenta.cliente }}</td>
+
+                            <td class="text-end fw-bold text-warning-emphasis">{{ cuenta.total_adeudado_formateado }}</td>
+
+                        </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                    <tfoot>
+
+                        <tr class="fila-total">
+
+                            <td class="text-end fw-bold">Total general:</td>
+
+                            <td class="text-end fw-bold fs-5">{{ total_fiados_formateado }}</td>
+
+                        </tr>
+
+                    </tfoot>
+
+                </table>
+
+            </div>
+
+        </div>
+
+        {% endif %}
+
+
+
+        <!-- Productos más vendidos -->
+
+        <h2 class="subtitulo-seccion mb-3">Productos más vendidos</h2>
+
+        {% if productos_vendidos %}
+
+        <div class="table-responsive mb-4">
+
+            <table class="table table-lg">
+
+                <thead class="table-dark">
+
+                    <tr>
+
+                        <th>Producto</th>
+
+                        <th>Unidades vendidas</th>
+
+                        <th>Total en pesos</th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                    {% for producto in productos_vendidos %}
+
+                    <tr>
+
+                        <td>{{ producto.nombre }}</td>
+
+                        <td>{{ producto.unidades }}</td>
+
+                        <td>{{ producto.total_formateado }}</td>
+
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+        {% else %}
+
+        <p class="texto-ayuda mb-4">No hubo ventas en este mes.</p>
+
+        {% endif %}
+
+
+
+        <div class="d-flex flex-wrap gap-3">
+
+            <button type="button" class="btn btn-primary btn-grande" onclick="window.print()">
+
+                Imprimir reporte
+
+            </button>
+
+            <a href="{% url 'inventario:historial_ventas' %}" class="btn btn-secondary btn-grande">
+
+                Volver al historial
+
+            </a>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}
+

@@ -1,0 +1,17 @@
+{% extends 'inventario/base.html' %}
+
+{% block titulo_pagina %}Sin proveedores - Mi Supermercado{% endblock %}
+
+{% block contenido %}
+<div class="row justify-content-center">
+    <div class="col-lg-7 text-center py-5">
+        <h1 class="titulo-seccion mb-4">Primero agrega un proveedor</h1>
+        <p class="fs-5 mb-4">
+            Para registrar productos necesitas tener al menos un proveedor en el sistema.
+        </p>
+        <a href="{% url 'inventario:crear_proveedor' %}" class="btn btn-success btn-grande">
+            Agregar proveedor
+        </a>
+    </div>
+</div>
+{% endblock %}

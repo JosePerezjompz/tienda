@@ -1,0 +1,328 @@
+{% extends 'inventario/base.html' %}
+
+
+
+{% block titulo_pagina %}Historial de ventas - Mi Supermercado{% endblock %}
+
+
+
+{% block contenido %}
+
+<h1 class="titulo-seccion mb-2">Historial de ventas</h1>
+
+<p class="texto-ayuda mb-4">Consulta facturas, filtra por fechas y revisa el resumen de ventas.</p>
+
+
+
+<!-- Indicadores de ventas por tipo de entrega -->
+
+<div class="indicadores-ventas mb-4">
+
+    <div class="tarjeta-resumen tarjeta-resumen-domicilio">
+
+        <p class="tarjeta-etiqueta">Ventas a domicilio</p>
+
+        <p class="tarjeta-valor">{{ total_domicilio_formateado }}</p>
+
+        <p class="tarjeta-subvalor">{{ cantidad_domicilio }} venta{{ cantidad_domicilio|pluralize:"s" }}</p>
+
+    </div>
+
+    <div class="tarjeta-resumen tarjeta-resumen-tienda">
+
+        <p class="tarjeta-etiqueta">Ventas en tienda</p>
+
+        <p class="tarjeta-valor">{{ total_tienda_formateado }}</p>
+
+        <p class="tarjeta-subvalor">{{ cantidad_tienda }} venta{{ cantidad_tienda|pluralize:"s" }}</p>
+
+    </div>
+
+    <div class="tarjeta-resumen tarjeta-resumen-fiado">
+
+        <p class="tarjeta-etiqueta">Cuentas por cobrar</p>
+
+        <p class="tarjeta-valor">{{ total_fiados_formateado }}</p>
+
+        <p class="tarjeta-subvalor">{{ cuentas_por_cobrar|length }} cliente{{ cuentas_por_cobrar|length|pluralize:"s" }}</p>
+
+    </div>
+
+</div>
+
+
+
+<!-- Filtro por fechas y tipo de entrega -->
+
+<div class="panel-seccion mb-4">
+
+    <h2 class="subtitulo-seccion mb-3">Filtrar ventas</h2>
+
+    <form method="get" class="row g-3 align-items-end">
+
+        <div class="col-md-3">
+
+            <label class="form-label etiqueta-grande">{{ form_filtro.fecha_desde.label }}</label>
+
+            {{ form_filtro.fecha_desde }}
+
+        </div>
+
+        <div class="col-md-3">
+
+            <label class="form-label etiqueta-grande">{{ form_filtro.fecha_hasta.label }}</label>
+
+            {{ form_filtro.fecha_hasta }}
+
+        </div>
+
+        <div class="col-md-3">
+
+            <label class="form-label etiqueta-grande">Tipo de entrega</label>
+
+            <select name="tipo_entrega" class="form-select form-select-lg">
+
+                <option value="" {% if not filtro_entrega %}selected{% endif %}>Todos</option>
+
+                <option value="domicilio" {% if filtro_entrega == 'domicilio' %}selected{% endif %}>Domicilio</option>
+
+                <option value="tienda" {% if filtro_entrega == 'tienda' %}selected{% endif %}>Comprado en Tienda</option>
+
+            </select>
+
+        </div>
+
+        <div class="col-md-3">
+
+            <button type="submit" class="btn btn-primary btn-grande w-100">Buscar</button>
+
+        </div>
+
+        {% if form_filtro.errors %}
+
+        <div class="col-12">
+
+            <div class="alert alert-danger alerta-grande">
+
+                {% for error in form_filtro.non_field_errors %}{{ error }}{% endfor %}
+
+            </div>
+
+        </div>
+
+        {% endif %}
+
+    </form>
+
+</div>
+
+
+
+<!-- Cuentas por cobrar (fiados) -->
+
+{% if cuentas_por_cobrar %}
+
+<div class="seccion-cxc mb-4">
+
+    <h2 class="subtitulo-seccion mb-3">Cuentas por cobrar (Fiados)</h2>
+
+    <p class="texto-ayuda mb-3">Montos adeudados agrupados por cliente en el periodo filtrado.</p>
+
+    <div class="table-responsive">
+
+        <table class="table table-lg align-middle mb-0">
+
+            <thead class="table-light">
+
+                <tr>
+
+                    <th>Cliente</th>
+
+                    <th class="text-end">Total adeudado</th>
+
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+                {% for cuenta in cuentas_por_cobrar %}
+
+                <tr>
+
+                    <td class="fw-semibold">{{ cuenta.cliente }}</td>
+
+                    <td class="text-end fw-bold text-warning-emphasis">{{ cuenta.total_adeudado_formateado }}</td>
+
+                </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+            <tfoot>
+
+                <tr class="fila-total">
+
+                    <td class="text-end fw-bold">Total general:</td>
+
+                    <td class="text-end fw-bold fs-5">{{ total_fiados_formateado }}</td>
+
+                </tr>
+
+            </tfoot>
+
+        </table>
+
+    </div>
+
+</div>
+
+{% endif %}
+
+
+
+<!-- Reporte mensual bajo demanda -->
+
+<div class="panel-seccion mb-4">
+
+    <h2 class="subtitulo-seccion mb-3">Reporte del mes</h2>
+
+    <p class="texto-ayuda mb-3">Genera un resumen detallado cuando lo necesites. No se borra nada del historial.</p>
+
+    <form method="post" action="{% url 'inventario:reporte_mensual' %}" class="row g-3 align-items-end">
+
+        {% csrf_token %}
+
+        <div class="col-md-4">
+
+            <label class="form-label etiqueta-grande">{{ form_reporte.mes.label }}</label>
+
+            {{ form_reporte.mes }}
+
+        </div>
+
+        <div class="col-md-4">
+
+            <label class="form-label etiqueta-grande">{{ form_reporte.anio.label }}</label>
+
+            {{ form_reporte.anio }}
+
+        </div>
+
+        <div class="col-md-4">
+
+            <button type="submit" class="btn btn-success btn-grande w-100">Generar reporte</button>
+
+        </div>
+
+    </form>
+
+</div>
+
+
+
+<!-- Lista de facturas -->
+
+<h2 class="subtitulo-seccion mb-3">Facturas registradas</h2>
+
+<div class="table-responsive">
+
+    <table class="table table-hover table-lg align-middle">
+
+        <thead class="table-dark">
+
+            <tr>
+
+                <th>Número</th>
+
+                <th>Fecha</th>
+
+                <th>Entrega</th>
+
+                <th>Total</th>
+
+                <th>Estado</th>
+
+                <th>Acción</th>
+
+            </tr>
+
+        </thead>
+
+        <tbody>
+
+            {% for item in ventas_lista %}
+
+            <tr>
+
+                <td class="fw-semibold">#{{ item.obj.id }}</td>
+
+                <td>{{ item.fecha_formateada }}</td>
+
+                <td>
+
+                    {% if item.obj.tipo_entrega == 'domicilio' %}
+
+                    <span class="badge-entrega badge-domicilio">Domicilio</span>
+
+                    {% else %}
+
+                    <span class="badge-entrega badge-tienda">En tienda</span>
+
+                    {% endif %}
+
+                </td>
+
+                <td class="fw-bold">{{ item.total_formateado }}</td>
+
+                <td>
+
+                    {% if item.es_fiado %}
+
+                    <span class="badge-entrega badge-fiado" title="Adeudado: {{ item.monto_adeudado_formateado }}">Fiado</span>
+
+                    {% else %}
+
+                    <span class="texto-ayuda">Pagado</span>
+
+                    {% endif %}
+
+                </td>
+
+                <td>
+
+                    <a href="{% url 'inventario:detalle_venta' item.obj.id %}"
+
+                       class="btn btn-outline-primary btn-accion">
+
+                        Ver detalle
+
+                    </a>
+
+                </td>
+
+            </tr>
+
+            {% empty %}
+
+            <tr>
+
+                <td colspan="6" class="text-center texto-ayuda py-5">
+
+                    No hay ventas registradas en este periodo.
+
+                </td>
+
+            </tr>
+
+            {% endfor %}
+
+        </tbody>
+
+    </table>
+
+</div>
+
+{% endblock %}
+

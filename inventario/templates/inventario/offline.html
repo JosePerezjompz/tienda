@@ -1,0 +1,33 @@
+{% extends 'inventario/base.html' %}
+
+{% block titulo_pagina %}Sin conexión - Mi Supermercado{% endblock %}
+
+{% block contenido %}
+<section class="row justify-content-center">
+    <div class="col-12 col-lg-8 col-xl-6">
+        <div class="alert alert-warning alerta-grande mb-4" role="alert">
+            Estás sin conexión a internet.
+        </div>
+
+        <h1 class="titulo-seccion mb-3">Modo offline</h1>
+        <p class="fs-4 texto-ayuda mb-4">
+            No se pudo cargar esta página porque todavía no está guardada en la caché del navegador.
+        </p>
+        <p class="fs-5 mb-4">
+            Puedes volver a una sección visitada recientemente o intentar de nuevo cuando regrese la conexión.
+        </p>
+
+        <div class="d-flex flex-wrap gap-3">
+            <a href="{% url 'inventario:facturacion' %}" class="btn btn-primary btn-grande">
+                Ir a ventas
+            </a>
+            <a href="{% url 'inventario:lista_inventario' %}" class="btn btn-outline-primary btn-grande">
+                Inventario
+            </a>
+            <button type="button" class="btn btn-secondary btn-grande" onclick="window.location.reload()">
+                Reintentar
+            </button>
+        </div>
+    </div>
+</section>
+{% endblock %}

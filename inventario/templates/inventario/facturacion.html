@@ -1,0 +1,275 @@
+{% extends 'inventario/base.html' %}
+{% load static %}
+
+{% block titulo_pagina %}Vender - Mi Supermercado{% endblock %}
+
+{% block contenido %}
+<div class="pagina-facturacion">
+
+    <!-- Encabezado de la vista -->
+    <div class="encabezado-facturacion d-flex flex-wrap align-items-end justify-content-between gap-3 mb-4 pb-3">
+        <div>
+            <h1 class="titulo-seccion mb-1">Registrar venta</h1>
+            <p class="texto-ayuda mb-0">Busca productos, arma el carrito y confirma la venta.</p>
+        </div>
+        <span class="badge badge-paso rounded-pill px-3 py-2 shadow-sm">Paso 1 · Seleccionar productos</span>
+    </div>
+
+    <div class="row g-4 align-items-start">
+
+        <!-- Columna izquierda: buscador y productos disponibles -->
+        <div class="col-lg-5">
+            <div class="card panel-productos border-0 shadow-sm rounded-4 h-100">
+                <div class="card-body p-4 p-lg-4">
+
+                    <div class="d-flex align-items-center gap-2 mb-3">
+                        <span class="icono-seccion icono-productos" aria-hidden="true"></span>
+                        <h2 class="subtitulo-seccion mb-0">Productos disponibles</h2>
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="buscador-productos" class="form-label etiqueta-grande mb-2">
+                            Buscar producto por nombre
+                        </label>
+                        <div class="input-group input-group-lg buscador-wrapper shadow-sm">
+                            <span class="input-group-text border-0 bg-white ps-3">
+                                <span class="icono-buscar" aria-hidden="true"></span>
+                            </span>
+                            <input type="text"
+                                   id="buscador-productos"
+                                   class="form-control form-control-lg border-0 shadow-none"
+                                   placeholder="Escribe el nombre del producto..."
+                                   autocomplete="off">
+                        </div>
+                        <div class="form-text texto-ayuda mt-2">
+                            Toca un producto para agregarlo al carrito.
+                        </div>
+                    </div>
+
+                    <div id="lista-productos" class="lista-productos">
+                        <p class="texto-ayuda">Cargando productos...</p>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- Columna derecha: carrito de compra -->
+        <div class="col-lg-7">
+            <div class="panel-carrito card border-0 shadow rounded-4 sticky-carrito">
+
+                <div class="card-header bg-white border-0 pt-4 px-4 pb-0 rounded-top-4">
+                    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="icono-seccion icono-carrito" aria-hidden="true"></span>
+                            <h2 class="subtitulo-seccion mb-0">Carrito de venta</h2>
+                        </div>
+                        <span class="badge bg-primary-subtle text-primary-emphasis rounded-pill px-3 py-2 fw-semibold">
+                            Resumen
+                        </span>
+                    </div>
+                </div>
+
+                <div class="card-body p-4 pt-3">
+
+                    <div id="carrito-vacio" class="carrito-vacio-estado text-center py-5 px-3 rounded-4">
+                        <div class="carrito-vacio-icono mb-3" aria-hidden="true"></div>
+                        <p class="fw-semibold fs-5 mb-1">El carrito está vacío</p>
+                        <p class="texto-ayuda mb-0">Selecciona productos de la lista para comenzar.</p>
+                    </div>
+
+                    <div id="carrito-contenido" class="d-none">
+                        <div class="table-responsive rounded-3 border tabla-carrito-wrapper">
+                            <table class="table table-lg align-middle mb-0" id="tabla-carrito">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th class="ps-3">Producto</th>
+                                        <th>Precio</th>
+                                        <th>Cantidad</th>
+                                        <th>Subtotal</th>
+                                        <th class="pe-3"></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="carrito-items"></tbody>
+                                <tfoot>
+                                    <tr class="fila-total">
+                                        <td colspan="3" class="text-end fw-bold fs-4 ps-3">Total:</td>
+                                        <td class="fw-bold fs-4 text-success" id="carrito-total">$0</td>
+                                        <td class="pe-3"></td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+
+                        <!-- Opciones de venta: tipo de entrega y fiado -->
+                        <div class="opciones-venta mt-4 pt-3 border-top">
+                            <h3 class="fs-5 fw-semibold mb-3">Opciones de venta</h3>
+
+                            <div class="mb-4">
+                                <label class="form-label etiqueta-grande mb-2">Tipo de entrega</label>
+                                <div class="selector-entrega d-flex flex-wrap gap-2">
+                                    <input type="radio" class="btn-check" name="tipo-entrega" id="entrega-tienda" value="tienda" checked>
+                                    <label class="btn btn-outline-primary btn-grande flex-fill" for="entrega-tienda">
+                                        <span class="icono-entrega icono-tienda me-2" aria-hidden="true"></span>
+                                        Comprado en Tienda
+                                    </label>
+                                    <input type="radio" class="btn-check" name="tipo-entrega" id="entrega-domicilio" value="domicilio">
+                                    <label class="btn btn-outline-primary btn-grande flex-fill" for="entrega-domicilio">
+                                        <span class="icono-entrega icono-domicilio me-2" aria-hidden="true"></span>
+                                        Domicilio
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="form-check form-switch mb-3">
+                                <input class="form-check-input" type="checkbox" role="switch" id="check-fiado">
+                                <label class="form-check-label etiqueta-grande" for="check-fiado">
+                                    Venta a crédito (Fiado)
+                                </label>
+                            </div>
+
+                            <div id="formulario-fiado" class="formulario-fiado d-none">
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label for="nombre-cliente-fiado" class="form-label etiqueta-grande">Nombre del cliente</label>
+                                        <input type="text"
+                                               id="nombre-cliente-fiado"
+                                               class="form-control form-control-lg"
+                                               placeholder="Ej: Juan Pérez"
+                                               autocomplete="off">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="monto-adeudado" class="form-label etiqueta-grande">Cantidad adeudada</label>
+                                        <div class="input-group input-group-lg">
+                                            <span class="input-group-text">$</span>
+                                            <input type="number"
+                                                   id="monto-adeudado"
+                                                   class="form-control"
+                                                   placeholder="0"
+                                                   min="1"
+                                                   step="1">
+                                        </div>
+                                        <div class="form-text texto-ayuda">Se llena automáticamente con el total de la venta.</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex flex-wrap gap-3 mt-4 pt-2">
+                            <button type="button"
+                                    id="btn-confirmar-venta"
+                                    class="btn btn-success btn-grande shadow-sm flex-grow-1 flex-md-grow-0"
+                                    disabled>
+                                Confirmar venta
+                            </button>
+                            <button type="button"
+                                    id="btn-anular-ultima"
+                                    class="btn btn-outline-danger btn-grande shadow-sm">
+                                Anular última venta
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: confirmar venta -->
+<div class="modal fade" id="modal-confirmar" tabindex="-1" aria-labelledby="modalConfirmarLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+            <div class="modal-header border-0 bg-success-subtle px-4 pt-4 pb-3">
+                <h2 class="modal-title fs-3 fw-bold text-success-emphasis" id="modalConfirmarLabel">Confirmar venta</h2>
+                <button type="button" class="btn-close btn-close-grande" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body fs-5 px-4 py-4">
+                <p class="mb-2">¿Seguro que quieres registrar esta venta?</p>
+                <p class="fw-bold fs-4 text-success mb-2" id="modal-total-texto"></p>
+                <div id="modal-resumen-opciones" class="resumen-opciones-modal"></div>
+            </div>
+            <div class="modal-footer border-0 d-flex gap-2 px-4 pb-4 pt-0">
+                <button type="button" class="btn btn-light btn-grande shadow-sm" data-bs-dismiss="modal">
+                    No, cancelar
+                </button>
+                <button type="button" class="btn btn-success btn-grande shadow-sm" id="btn-modal-si">
+                    Sí, registrar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: anular última venta -->
+<div class="modal fade" id="modal-anular" tabindex="-1" aria-labelledby="modalAnularLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+            <div class="modal-header border-0 bg-danger-subtle px-4 pt-4 pb-3">
+                <h2 class="modal-title fs-3 fw-bold text-danger-emphasis" id="modalAnularLabel">Anular venta</h2>
+                <button type="button" class="btn-close btn-close-grande" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body fs-5 px-4 py-4">
+                <p class="mb-2">¿Seguro que quieres anular la última venta registrada?</p>
+                <p class="texto-ayuda mb-0">El stock de los productos se restaurará automáticamente.</p>
+            </div>
+            <div class="modal-footer border-0 d-flex gap-2 px-4 pb-4 pt-0">
+                <button type="button" class="btn btn-light btn-grande shadow-sm" data-bs-dismiss="modal">
+                    No, cancelar
+                </button>
+                <button type="button" class="btn btn-danger btn-grande shadow-sm" id="btn-modal-anular-si">
+                    Sí, anular venta
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: factura final con opción de imprimir -->
+<div class="modal fade" id="modal-factura" tabindex="-1" aria-labelledby="modalFacturaLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+            <div class="modal-header bg-success text-white border-0 px-4 pt-4 pb-3">
+                <h2 class="modal-title fs-3 fw-bold" id="modalFacturaLabel">Factura de venta</h2>
+            </div>
+            <div class="modal-body px-4 py-4" id="contenido-factura">
+                <!-- Se llena con JavaScript después de confirmar -->
+            </div>
+            <div class="modal-footer border-0 px-4 pb-4 pt-0 gap-2">
+                <button type="button" class="btn btn-primary btn-grande shadow-sm" id="btn-imprimir-factura">
+                    Imprimir factura
+                </button>
+                <button type="button" class="btn btn-light btn-grande shadow-sm" data-bs-dismiss="modal">
+                    Cerrar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Mensaje de éxito grande: permanece hasta que el usuario lo cierre -->
+<div id="mensaje-exito" class="mensaje-exito d-none" role="alert">
+    <div class="mensaje-exito-contenido shadow-lg">
+        <div class="mensaje-exito-icono mb-3" aria-hidden="true"></div>
+        <p class="mensaje-exito-texto" id="mensaje-exito-texto"></p>
+        <button type="button" class="btn btn-light btn-grande mt-4 shadow-sm" id="btn-cerrar-exito">
+            Entendido
+        </button>
+    </div>
+</div>
+
+<!-- Mensaje de error -->
+<div id="mensaje-error" class="toast-error alert alert-danger alerta-grande d-none shadow-lg" role="alert">
+    <div class="d-flex align-items-center justify-content-between gap-3 flex-wrap">
+        <span id="mensaje-error-texto"></span>
+        <button type="button" class="btn btn-outline-danger btn-sm flex-shrink-0" id="btn-cerrar-error">Cerrar</button>
+    </div>
+</div>
+
+<!-- Token CSRF para peticiones AJAX seguras -->
+<input type="hidden" id="csrf-token" value="{{ csrf_token }}">
+{% endblock %}
+
+{% block scripts_extra %}
+<script src="{% static 'inventario/js/facturacion.js' %}"></script>
+{% endblock %}

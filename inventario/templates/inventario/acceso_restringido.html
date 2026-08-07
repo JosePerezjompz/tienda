@@ -1,0 +1,49 @@
+{% extends 'inventario/base.html' %}
+
+{% block titulo_pagina %}Acceso protegido - Mi Supermercado{% endblock %}
+
+{% block contenido %}
+<div class="row justify-content-center">
+    <div class="col-12 col-md-8 col-lg-5">
+        <h1 class="titulo-seccion mb-4">Acceso protegido</h1>
+
+        <div class="alert alert-info alerta-grande mb-4" role="alert">
+            Ingresa la contraseña para entrar a esta sección.
+        </div>
+
+        <form method="post" novalidate>
+            {% csrf_token %}
+            <input type="hidden" name="next" value="{{ next }}">
+
+            <div class="mb-4">
+                <label for="password" class="form-label etiqueta-grande">
+                    Contraseña
+                </label>
+                <input
+                    type="password"
+                    name="password"
+                    id="password"
+                    class="form-control form-control-lg"
+                    autocomplete="current-password"
+                    autofocus
+                    required
+                >
+                {% if error %}
+                <div class="text-danger fs-5 mt-2">
+                    {{ error }}
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="d-flex flex-wrap gap-3">
+                <button type="submit" class="btn btn-primary btn-grande">
+                    Entrar
+                </button>
+                <a href="{% url 'inventario:facturacion' %}" class="btn btn-secondary btn-grande">
+                    Volver a ventas
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,58 @@
+{% extends 'inventario/base.html' %}
+
+{% block titulo_pagina %}{{ titulo }} - Mi Supermercado{% endblock %}
+
+{% block contenido %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <h1 class="titulo-seccion mb-4">{{ titulo }}</h1>
+
+        {% if producto %}
+        <div class="alert alert-info alerta-grande mb-4">
+            Stock actual: <strong>{{ producto.cantidad_stock }} unidades</strong>.
+            Puedes aumentar la cantidad cuando llegue mercancía nueva del proveedor.
+        </div>
+        {% endif %}
+
+        <form method="post" novalidate>
+            {% csrf_token %}
+
+            {% for campo in form %}
+            <div class="mb-4 {% if campo.name == 'activo' %}form-check{% endif %}">
+                {% if campo.name == 'activo' %}
+                <div class="d-flex align-items-center gap-3">
+                    {{ campo }}
+                    <label for="{{ campo.id_for_label }}" class="form-check-label etiqueta-grande mb-0">
+                        Producto activo (visible en ventas)
+                    </label>
+                </div>
+                {% else %}
+                <label for="{{ campo.id_for_label }}" class="form-label etiqueta-grande">
+                    {{ campo.label }}
+                </label>
+                {{ campo }}
+                {% endif %}
+                {% if campo.errors %}
+                    <div class="text-danger fs-5 mt-1">
+                        {% for error in campo.errors %}{{ error }}{% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+
+            {% if form.non_field_errors %}
+            <div class="alert alert-danger alerta-grande">
+                {% for error in form.non_field_errors %}{{ error }}{% endfor %}
+            </div>
+            {% endif %}
+
+            <div class="d-flex flex-wrap gap-3 mt-4">
+                <button type="submit" class="btn btn-success btn-grande">{{ boton }}</button>
+                <a href="{% url 'inventario:lista_inventario' %}" class="btn btn-secondary btn-grande">
+                    Volver al inventario
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
